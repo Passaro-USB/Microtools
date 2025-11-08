@@ -5,6 +5,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
+#include <stdio.h>
+#include <strings.h>
+#include <ctype.h>
 
 // Functions for alinging entities in such a way to allow for fast removal or
 // addition of big groups of entities as well as iterating over them.
@@ -59,5 +62,18 @@ typedef struct Timer {
 } Timer;
 
 bool time_update(Time* time, float delta);
+
+// Functions for asset loading
+typedef struct Asset {
+	char name[16];
+	uint64_t pos;
+} Asset;
+
+uint64_t asset_loader_find_next_tag(FILE* file);
+uint64_t asset_loader_find_tag(FILE* file, char name[16]);
+void asset_loader_goto(FILE* file, uint64_t pos);
+Asset asset_loader_read_next(FILE* file);
+bool asset_read_field(FILE* file, Asset asset, char name[16],
+			int32_t* out, uint32_t count);
 
 #endif

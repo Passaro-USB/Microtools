@@ -1,4 +1,5 @@
 main.exe
 test.c
+test.config
 src/
 makefile
