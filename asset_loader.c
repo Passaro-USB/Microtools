@@ -21,10 +21,10 @@ uint64_t asset_loader_find_tag(FILE* file, char name[16]) {
 		uint64_t curr = asset_loader_find_next_tag(file);
 		fread(&c, sizeof(char), 1, file);
 		while (c != '\n') {
-			fread(&c, sizeof(char), 1, file);
 			if (isalnum(c) || c == '_') {
 				buffer[count++] = c;
 			}
+			fread(&c, sizeof(char), 1, file);
 		}
 		if (strcmp(buffer, name) == 0) {
 			pos = curr;
@@ -55,8 +55,8 @@ Asset asset_loader_read_next(FILE* file) {
 	return asset;
 }
 
-bool asset_read_field(FILE* file, Asset asset, char name[16],
-			int32_t* out, uint32_t count) {
+bool asset_read_numeric_field(FILE* file, Asset asset, char name[16],
+			int32_t* out, uint32_t capacity) {
 	char buffer[16] = {0};
 	uint32_t buffer_len = 0;
 	uint32_t number_lenght = 0;
@@ -67,7 +67,7 @@ bool asset_read_field(FILE* file, Asset asset, char name[16],
 	fseek(file, asset.pos, SEEK_SET);
 	fread(&c, sizeof(char), 1, file);
 	while (c != EOF) {
-		memset(out, 0, sizeof(int32_t) * count);
+		memset(out, 0, sizeof(int32_t) * capacity);
 		memset(buffer, 0, sizeof(buffer));
 		buffer_len = 0;
 		number_lenght = 0;
@@ -96,7 +96,7 @@ bool asset_read_field(FILE* file, Asset asset, char name[16],
 				if (is_number_negative) {
 					out[number_count] *= -1;
 				}
-				if (number_count >= count) {
+				if (number_count >= capacity) {
 					return true;
 				}
 				number_lenght = 0;
@@ -114,6 +114,54 @@ bool asset_read_field(FILE* file, Asset asset, char name[16],
 		}
 		if (is_number_negative) {
 			out[number_count] *= -1;
+		}
+		return true;
+	}
+	return false;
+}
+
+bool asset_read_text_field(FILE* file, Asset asset, char name[16],
+			char* out, uint32_t capacity) {
+	char buffer[16] = {0};
+	uint32_t buffer_len = 0;
+	uint64_t pos = -1;
+	uint32_t text_len = 0;
+	char c;
+	fseek(file, asset.pos, SEEK_SET);
+	fread(&c, sizeof(char), 1, file);
+	while (c != EOF) {
+		memset(out, 0, sizeof(int32_t) * capacity);
+		memset(buffer, 0, sizeof(buffer));
+		buffer_len = 0;
+		text_len = 0;
+		while (c != '.') {
+			fread(&c, sizeof(char), 1, file);
+		}
+		pos = ftell(file);
+		while (!(isalnum(c) || c == '_')) {
+			fread(&c, sizeof(char), 1, file);
+		}
+		while (isalnum(c) || c == '_') {
+			buffer[buffer_len++] = c;
+			fread(&c, sizeof(char), 1, file);
+		}
+		if (strcmp(buffer, name) != 0) {
+			continue;
+		}
+		while (c != '\"') {
+			fread(&c, sizeof(char), 1, file);
+		}
+		fread(&c, sizeof(char), 1, file);
+		while (c != '\"') {
+			if (c == '\"') {
+				continue;
+			}
+			if (text_len >= capacity) {
+				return true;
+			}
+			out[text_len] = c;
+			text_len++;
+			fread(&c, sizeof(char), 1, file);
 		}
 		return true;
 	}

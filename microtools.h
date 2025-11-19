@@ -8,10 +8,11 @@
 #include <stdio.h>
 #include <strings.h>
 #include <ctype.h>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 // Functions for alinging entities in such a way to allow for fast removal or
 // addition of big groups of entities as well as iterating over them.
-
 typedef struct EntityNode {
 	void* entities;
 	size_t capacity;
@@ -40,8 +41,9 @@ bool entity_chain_remove(EntityChain* chain, EntityNode* node);
 void entity_chain_free(EntityChain* chain);
 
 
-// Functions for creating synchronized timers
 
+
+// Functions for creating synchronized timers
 typedef struct Time {
 	EntityChain timers;
 	float global_timer;
@@ -73,7 +75,43 @@ uint64_t asset_loader_find_next_tag(FILE* file);
 uint64_t asset_loader_find_tag(FILE* file, char name[16]);
 void asset_loader_goto(FILE* file, uint64_t pos);
 Asset asset_loader_read_next(FILE* file);
-bool asset_read_field(FILE* file, Asset asset, char name[16],
-			int32_t* out, uint32_t count);
+bool asset_read_text_field(FILE* file, Asset asset, char name[16],
+			char* out, uint32_t capacity);
+bool asset_read_numeric_field(FILE* file, Asset asset, char name[16],
+			int32_t* out, uint32_t capacity);
+
+
+
+//  Functions for handling some opengl boilerplate
+typedef struct Vector3 {
+	float x;
+	float y;
+	float z;
+} Vector3;
+
+typedef struct Vector2 {
+	float x;
+	float y;
+} Vector2;
+
+typedef struct Shape {
+	uint32_t vao;
+	uint32_t vbo;
+	uint32_t ebo;
+	uint32_t vertex_count;
+	uint32_t index_count;
+} Shape;
+
+typedef struct Shader {
+	uint32_t shader_id;
+	GLenum shader_type;
+} Shader;
+
+uint32_t glutils_load_texture(char* path, GLenum format, GLenum type);
+Shape glutils_setup_shape(float* vertices, uint32_t vertex_count,
+		uint32_t* indices, uint32_t index_count);
+Shader glutils_load_and_compile_shader(char* path, GLenum shader_type);
+uint32_t glutils_link_shader_program(Shader* shaders, uint32_t count);
+void glutils_config_window(GLFWwindow* window);
 
 #endif
