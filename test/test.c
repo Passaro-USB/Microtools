@@ -42,15 +42,14 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glUseProgram(program);
-		printf("%f\n", switch_timer.value);
 		if (switch_timer.just_reached_max) {
 			((Timer*)time.timers.first->entities)->value = switch_timer.max;
 			target *= -1;
 		}
-		float oy = transit_tween_get(-target, target, 0.999, switch_timer.max - switch_timer.value);
+		float oy = transit_linear_get(-target, target, 0.999, switch_timer.max - switch_timer.value);
 		// diff is always lower than 0.01, so I am considering the two to be equivalent
-		printf("%f | %f | %f | diff: %f", switch_timer.value, y, oy, fabs(y - oy));
-		y = transit_tween_get_next_instant(y, target, 0.999, delta);
+		printf("%f | %f | %f | diff: %f\n", switch_timer.value, y, oy, fabs(y - oy));
+		y = transit_linear_get_next_instant(y, target, 0.999, delta);
 		glUniform2f(glGetUniformLocation(program, "offset"), 0.0, y);
 		glBindVertexArray(square.vao);
 		glDrawElements(GL_TRIANGLES, square.index_count, GL_UNSIGNED_INT, 0);

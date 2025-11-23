@@ -11,6 +11,23 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+// Structures for representing vectors
+typedef struct Vector2 {
+	float x;
+	float y;
+} Vector2;
+
+typedef struct Vector2i {
+	int32_t x;
+	int32_t y;
+} Vector2i;
+
+typedef struct Vector3 {
+	float x;
+	float y;
+	float z;
+} Vector3;
+
 // Functions for alinging entities in such a way to allow for fast removal or
 // addition of big groups of entities as well as iterating over them.
 typedef struct EntityNode {
@@ -65,6 +82,8 @@ typedef struct Timer {
 
 bool time_update(Time* time, float delta);
 
+
+
 // Functions for asset loading
 typedef struct Asset {
 	char name[16];
@@ -83,17 +102,6 @@ bool asset_read_numeric_field(FILE* file, Asset asset, char name[16],
 
 
 //  Functions for handling some opengl boilerplate
-typedef struct Vector3 {
-	float x;
-	float y;
-	float z;
-} Vector3;
-
-typedef struct Vector2 {
-	float x;
-	float y;
-} Vector2;
-
 typedef struct Shape {
 	uint32_t vao;
 	uint32_t vbo;
@@ -113,5 +121,39 @@ Shape glutils_setup_shape(float* vertices, uint32_t vertex_count,
 Shader glutils_load_and_compile_shader(char* path, GLenum shader_type);
 uint32_t glutils_link_shader_program(Shader* shaders, uint32_t count);
 void glutils_config_window(GLFWwindow* window);
+
+
+
+// Functions for in-betweening (transiting) values
+float transit_linear_get(float start, float end, float angle, float t);
+float transit_linear_get_next_instant(float current, float end, float angle, float delta);
+float transit_linear_get_duration(float start, float end, float angle);
+float transit_tween_get(float current, float end, float c, float t);
+float transit_tween_get_next_instant(float current, float end, float c, float delta);
+float transit_tween_get_duration(float coeficient);
+
+
+
+// Functions for capturing user input 
+bool input_read_key(GLenum key);
+
+
+
+// Functions for identifing and resolving collision
+typedef struct EntityChunk {
+	Vector2i pos;
+	uint32_t id;
+} EntityChunk;
+
+typedef struct EntityPairIter {
+	uint32_t chunk_a;
+	uint32_t chunk_b;
+} EntityPairIter;
+
+EntityChunk collision_get_point_chunk(Vector2 point);
+void collision_update_point_chunks(EntityChunk* chunks, Vector2* points);
+void collision_sort_point_chunks(EntityChunk* chunks);
+void entity_pair_iter_next(EntityPairIter* iter, EntityChunk* chunks);
+void entity_pair_iter_get_ids(uint32_t* a, uint32_t* b);
 
 #endif
