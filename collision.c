@@ -1,12 +1,12 @@
 #include "microtools.h"
 
-#define CHUNK_SIZE (1.0 / 5.0)
+#define CHUNK_SIZE (1.0 / 3.0)
 
 EntityChunk collision_get_point_chunk(uint32_t id, Vector2 point) {
 	return (EntityChunk) { 
 		.chunk = {
-			.x = floor(point.x / CHUNK_SIZE - 0.5),
-			.y = floor(point.y / CHUNK_SIZE - 0.5),
+			.x = floor(point.x / CHUNK_SIZE + 0.5),
+			.y = floor(point.y / CHUNK_SIZE + 0.5),
 		},
 		.id = id,
 	};
@@ -67,4 +67,13 @@ bool entity_pair_iter_next(EntityPairIter* iter, EntityChunk* chunks, uint32_t c
 		iter->chunk_b ++;
 	}
 	return true;
+}
+
+
+bool collision_aabb_check(Vector2 a_pos, Vector2 a_size, Vector2 b_pos, Vector2 b_size) {
+	float x_dis = fabs(a_pos.x - b_pos.x);
+	float y_dis = fabs(a_pos.y - b_pos.y);
+	float x_size = (a_size.x + b_size.x);
+	float y_size = (a_size.y + b_size.y);
+	return (x_dis < x_size && y_dis < y_size);
 }

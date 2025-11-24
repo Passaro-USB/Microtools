@@ -11,7 +11,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-// Structures for representing vectors
+// Structures for representing points
 typedef struct Vector2 {
 	float x;
 	float y;
@@ -150,5 +150,6 @@ void collision_update_point_chunks(EntityChunk* chunks, Vector2* points, uint32_
 void collision_sort_point_chunks(EntityChunk* chunks, uint32_t count);
 bool collision_are_broadly_colliding(EntityChunk* chunks, uint32_t a, uint32_t b);
 bool entity_pair_iter_next(EntityPairIter* iter, EntityChunk* chunks, uint32_t count);
+bool collision_aabb_check(Vector2 a_pos, Vector2 a_size, Vector2 b_pos, Vector2 b_size);
 
 #endif
