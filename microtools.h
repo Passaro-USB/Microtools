@@ -134,14 +134,9 @@ float transit_tween_get_duration(float coeficient);
 
 
 
-// Functions for capturing user input 
-bool input_read_key(GLenum key);
-
-
-
 // Functions for identifing and resolving collision
 typedef struct EntityChunk {
-	Vector2i pos;
+	Vector2i chunk;
 	uint32_t id;
 } EntityChunk;
 
@@ -150,10 +145,10 @@ typedef struct EntityPairIter {
 	uint32_t chunk_b;
 } EntityPairIter;
 
-EntityChunk collision_get_point_chunk(Vector2 point);
-void collision_update_point_chunks(EntityChunk* chunks, Vector2* points);
-void collision_sort_point_chunks(EntityChunk* chunks);
-void entity_pair_iter_next(EntityPairIter* iter, EntityChunk* chunks);
-void entity_pair_iter_get_ids(uint32_t* a, uint32_t* b);
+EntityChunk collision_get_point_chunk(uint32_t id, Vector2 point);
+void collision_update_point_chunks(EntityChunk* chunks, Vector2* points, uint32_t count);
+void collision_sort_point_chunks(EntityChunk* chunks, uint32_t count);
+bool collision_are_broadly_colliding(EntityChunk* chunks, uint32_t a, uint32_t b);
+bool entity_pair_iter_next(EntityPairIter* iter, EntityChunk* chunks, uint32_t count);
 
 #endif
