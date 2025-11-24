@@ -1,2 +1,4 @@
 src/
 dependencies/
+test/*.exe
+test/*.dll
