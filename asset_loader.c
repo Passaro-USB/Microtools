@@ -167,3 +167,71 @@ bool asset_read_text_field(FILE* file, Asset asset, char name[16],
 	}
 	return false;
 }
+
+
+bool asset_read_frame_sequence_field(FILE* file, Asset asset, char name[16],
+			FrameSequence* out, uint32_t capacity) {
+	char buffer[16] = {0};
+	uint32_t buffer_len = 0;
+	uint64_t pos = -1;
+	uint32_t index = 0;
+	char c;
+	fseek(file, asset.pos, SEEK_SET);
+	fread(&c, sizeof(char), 1, file);
+	while (c != EOF) {
+		memset(out->frames, 0, sizeof(Frame) * capacity);
+		memset(buffer, 0, sizeof(buffer));
+		buffer_len = 0;
+		index = 0;
+		while (c != '.') {
+			fread(&c, sizeof(char), 1, file);
+		}
+		pos = ftell(file);
+		while (!(isalnum(c) || c == '_')) {
+			fread(&c, sizeof(char), 1, file);
+		}
+		while (isalnum(c) || c == '_') {
+			buffer[buffer_len++] = c;
+			fread(&c, sizeof(char), 1, file);
+		}
+		if (strcmp(buffer, name) != 0) {
+			continue;
+		}
+		while (c != '!') {
+			fread(&c, sizeof(char), 1, file);
+			if (c == '!') {
+				continue;
+			}
+			if (c == '\n' || c == ' ') {
+				continue;
+			}
+			if (c == ',') {
+				index ++;
+				continue;
+			}
+			if (c == '[') {
+				continue;
+			}
+			if (c == ']') {
+				index = 0;
+				out->frame_count ++;
+				if (out->frame_count >= capacity) {
+					return true;
+				}
+				continue;
+			}
+			if (index == 0) {
+				out->frames[out->frame_count].value *= 10;
+				out->frames[out->frame_count].value += c - '0';
+			} else if (index == 1) {
+				out->frames[out->frame_count].duration *= 10;
+				out->frames[out->frame_count].duration += c - '0';
+			} else if (index == 2) {
+				out->frames[out->frame_count].interpolation *= 10;
+				out->frames[out->frame_count].interpolation += c - '0';
+			} 
+		}
+		return true;
+	}
+	return false;
+}

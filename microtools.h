@@ -84,6 +84,45 @@ bool time_update(Time* time, float delta);
 
 
 
+// Functions for handling timed sequences (animation)
+typedef enum FrameInterpolation {
+	NONE,
+	LINEAR,
+	TWEEN,
+} FrameInterpolation;
+
+typedef struct Frame {
+	float duration;
+	float value;
+	FrameInterpolation interpolation;
+} Frame;
+
+typedef enum SequenceEndBehavior {
+	FREEZE,
+	REPEAT,
+	PING_PONG,
+} SequenceEndBehavior;
+
+typedef struct FrameSequence {
+	Frame* frames;
+	uint32_t frame_count;
+	SequenceEndBehavior on_end;
+} FrameSequence;
+
+typedef struct FrameSequenceState {
+	Timer* timer;
+	uint32_t index;
+	float speed;
+	bool reversed;
+	float value;
+	float prev_value;
+} FrameSequenceState;
+
+void frame_sequence_next_frame(FrameSequenceState* out, FrameSequence sequence);
+float frame_sequence_state_update(FrameSequenceState* out, FrameSequence sequence);
+
+
+
 // Functions for asset loading
 typedef struct Asset {
 	char name[16];
@@ -98,6 +137,8 @@ bool asset_read_text_field(FILE* file, Asset asset, char name[16],
 			char* out, uint32_t capacity);
 bool asset_read_numeric_field(FILE* file, Asset asset, char name[16],
 			int32_t* out, uint32_t capacity);
+bool asset_read_frame_sequence_field(FILE* file, Asset asset, char name[16],
+			FrameSequence* out, uint32_t capacity);
 
 
 

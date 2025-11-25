@@ -8,6 +8,29 @@ int main() {
 	glewInit();
 	glutils_config_window(window);
 
+	Timer animation_timer_x = {0};
+	Timer animation_timer_y = {0};
+	FILE* config_file = fopen("test.config", "r");
+	Asset player = asset_loader_read_next(config_file);
+	Frame xframes[4] = {0};
+	Frame yframes[4] = {0};
+	FrameSequence my_sequence_x = {.frames = xframes};
+	FrameSequence my_sequence_y = {.frames = yframes};
+	my_sequence_x.on_end = REPEAT;
+	my_sequence_y.on_end = REPEAT;
+	asset_read_frame_sequence_field(config_file, player,
+				"xanimation", &my_sequence_x, 4);
+	asset_read_frame_sequence_field(config_file, player,
+				"yanimation", &my_sequence_y, 4);
+	fclose(config_file);
+
+	Time time = {0};
+	entity_chain_add(&time.timers, &animation_timer_x, 1, false)->count = 1;
+	entity_chain_add(&time.timers, &animation_timer_y, 1, false)->count = 1;
+
+	FrameSequenceState my_animation_x = {.timer = &animation_timer_x};
+	FrameSequenceState my_animation_y = {.timer = &animation_timer_y};
+
 	float vertices[] = {
 		-1.0, 1.0,
 		1.0, 1.0,
@@ -44,10 +67,14 @@ int main() {
 	};
 
 	glClearColor(0.0, 0.0, 0.3, 1.0);
-	float time = glfwGetTime();
+	float global_time = glfwGetTime();
 	float delta = 0.0;
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		float vx = frame_sequence_state_update(&my_animation_x, my_sequence_x);
+		float vy = frame_sequence_state_update(&my_animation_y, my_sequence_y);
+		positions[1].x = vx / 5.0 - 1;
+		positions[1].y = vy / 5.0 - 1;
 		EntityPairIter iter = {};
 		collision_update_point_chunks(chunks, positions, count);
 		collision_sort_point_chunks(chunks, count);
@@ -56,10 +83,10 @@ int main() {
 			uint32_t b_id = chunks[iter.chunk_b].id;
 			if (collision_aabb_check(positions[a_id], sizes[a_id],
 						positions[b_id], sizes[b_id])) {
-				printf("(%i %i), ", a_id, b_id);
+				printf("(%i, %i), ", a_id, b_id);
 			}
-			printf("[%i %i], ", a_id, b_id);
 		}
+		printf("\n");
 
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 			positions[0].x += delta;
@@ -81,13 +108,15 @@ int main() {
 		glDrawElementsInstanced(GL_TRIANGLES, rect.index_count,
 				GL_UNSIGNED_INT, 0, count);
 
-		printf("\n");
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-		delta = time;
-		time = glfwGetTime();
-		delta = time - delta;
+		time_update(&time, delta);
+
+		delta = global_time;
+		global_time = glfwGetTime();
+		delta = global_time - delta;
 	}
+	glfwTerminate();
 }
 
