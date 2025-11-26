@@ -22,6 +22,10 @@ float transit_linear_get_next_instant(float current, float end, float angle, flo
 	return value;
 }
 
+float transit_linear_get_coefficient(float start, float end, float t) {
+	return fabs(end - start) / t;
+}
+
 float transit_linear_get_duration(float start, float end, float angle) {
 	return fabs(end - start / angle);
 }
@@ -36,6 +40,10 @@ float transit_tween_get_next_instant(float current, float end, float c, float de
 	return end - fmaxf(fabs(end - current) * pow(1 - c, delta), 0.0) * dir;
 }
 
+float transit_tween_get_coefficient(float t) {
+	return 1.0 - pow(2.0, log2(0.001) / (double)t);
+}
+
 float transit_tween_get_duration(float coeficient) {
-	return log2(0.0001) / log2(1 - coeficient);
+	return log2(0.001) / log2(1 - coeficient);
 }

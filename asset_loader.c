@@ -197,6 +197,15 @@ bool asset_read_frame_sequence_field(FILE* file, Asset asset, char name[16],
 		if (strcmp(buffer, name) != 0) {
 			continue;
 		}
+		while (!isdigit(c)) {
+			fread(&c, sizeof(char), 1, file);
+		}
+		out->on_end = 0;
+		while (isdigit(c)) {
+			out->on_end *= 10;
+			out->on_end += c - '0';
+			fread(&c, sizeof(char), 1, file);
+		}
 		while (c != '!') {
 			fread(&c, sizeof(char), 1, file);
 			if (c == '!') {

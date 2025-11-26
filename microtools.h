@@ -168,9 +168,11 @@ void glutils_config_window(GLFWwindow* window);
 // Functions for in-betweening (transiting) values
 float transit_linear_get(float start, float end, float angle, float t);
 float transit_linear_get_next_instant(float current, float end, float angle, float delta);
+float transit_linear_get_coefficient(float start, float end, float t);
 float transit_linear_get_duration(float start, float end, float angle);
 float transit_tween_get(float current, float end, float c, float t);
 float transit_tween_get_next_instant(float current, float end, float c, float delta);
+float transit_tween_get_coefficient(float t);
 float transit_tween_get_duration(float coeficient);
 
 

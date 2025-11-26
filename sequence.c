@@ -51,20 +51,31 @@ float frame_sequence_state_update(FrameSequenceState* out, FrameSequence sequenc
 		case NONE:
 			out->value = sequence.frames[out->index].value;
 			break;
-		case LINEAR:
+		case LINEAR: {
 			if (out->timer->max == 0) {
 				out->value = sequence.frames[out->index].value;
 				break;
 			}
-			float diff = sequence.frames[out->index].value 
-				- out->prev_value;
+			float c = transit_linear_get_coefficient(
+					out->prev_value, 
+					sequence.frames[out->index].value,
+					out->timer->max);
 			out->value = transit_linear_get(out->prev_value, 
 					sequence.frames[out->index].value,
-					fabs(diff) / out->timer->max,
-					out->timer->value);
+					c, out->timer->value);
 			break;
-		case TWEEN:
+		}
+		case TWEEN: {
+			if (out->timer->max == 0) {
+				out->value = sequence.frames[out->index].value;
+				break;
+			}
+			float c = transit_tween_get_coefficient(out->timer->max);
+			out->value = transit_tween_get(out->prev_value, 
+					sequence.frames[out->index].value,
+					c, out->timer->value);
 			break;
+		}
 	}
 	return out->value;
 }

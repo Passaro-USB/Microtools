@@ -16,8 +16,6 @@ int main() {
 	Frame yframes[4] = {0};
 	FrameSequence my_sequence_x = {.frames = xframes};
 	FrameSequence my_sequence_y = {.frames = yframes};
-	my_sequence_x.on_end = REPEAT;
-	my_sequence_y.on_end = REPEAT;
 	asset_read_frame_sequence_field(config_file, player,
 				"xanimation", &my_sequence_x, 4);
 	asset_read_frame_sequence_field(config_file, player,
