@@ -2,3 +2,7 @@ src/
 dependencies/
 test/*.exe
 test/*.dll
+examples/bin
+examples/build
+install/
+build/
